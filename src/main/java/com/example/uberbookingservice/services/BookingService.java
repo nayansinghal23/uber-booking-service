@@ -12,4 +12,5 @@ import java.util.List;
 public interface BookingService {
     CreateBookingResponseDTO createBooking(CreateBookingRequestDTO dto);
     List<GetAllBookingsResponseDTO> getAllBookings(GetAllBookingsRequestDTO dto);
+    void cancelBooking(Long bookingId);
 }

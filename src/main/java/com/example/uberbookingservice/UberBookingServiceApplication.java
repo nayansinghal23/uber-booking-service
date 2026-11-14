@@ -18,5 +18,4 @@ public class UberBookingServiceApplication {
 
 /**
  * Update booking status when driver accepts a ride (SCHEDULED)
- * Cancel a ride (CANCELLED)
  */

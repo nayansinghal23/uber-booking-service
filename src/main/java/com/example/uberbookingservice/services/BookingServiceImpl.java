@@ -15,6 +15,7 @@ import com.example.uberentityservice.models.Passenger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -142,5 +143,28 @@ public class BookingServiceImpl implements BookingService {
                 .stream()
                 .map(GetAllBookingsResponseDTO::as)
                 .toList();
+    }
+
+    @Transactional
+    @Override
+    public void cancelBooking(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Booking not found")
+                );
+
+        if (booking.getBookingStatus() == BookingStatus.COMPLETED ||
+                booking.getBookingStatus() == BookingStatus.CANCELLED) {
+            throw new IllegalStateException(
+                    "Booking cannot be cancelled"
+            );
+        }
+
+        int update = bookingRepository.updateBookingStatus(
+                bookingId,
+                BookingStatus.CANCELLED
+        );
+
+        if (update == 0) throw new IllegalStateException("Booking cannot be cancelled");
     }
 }

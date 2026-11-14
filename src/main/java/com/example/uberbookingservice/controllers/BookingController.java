@@ -41,4 +41,14 @@ public class BookingController {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PatchMapping("/{bookingId}")
+    private ResponseEntity<String> cancelBooking(@PathVariable Long bookingId) {
+        try {
+            bookingService.cancelBooking(bookingId);
+            return new ResponseEntity<>("Booking has been cancelled", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
