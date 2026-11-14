@@ -21,8 +21,12 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<CreateBookingResponseDTO> createBooking(@RequestBody CreateBookingRequestDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                bookingService.createBooking(dto)
-        );
+        try {
+            CreateBookingResponseDTO booking = bookingService.createBooking(dto);
+            return new ResponseEntity<>(booking, HttpStatus.OK);
+        } catch (Exception e) {
+            System.out.print(e.getStackTrace());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 }

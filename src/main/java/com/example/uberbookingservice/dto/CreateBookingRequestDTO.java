@@ -1,6 +1,5 @@
 package com.example.uberbookingservice.dto;
 
-import com.example.uberentityservice.models.ExactLocation;
 import lombok.*;
 
 @Getter
@@ -10,6 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 public class CreateBookingRequestDTO {
     private Long passengerId;
-    private ExactLocation startLocation;
-    private ExactLocation endLocation;
+    private LocationDTO startLocation;
+    private LocationDTO endLocation;
 }

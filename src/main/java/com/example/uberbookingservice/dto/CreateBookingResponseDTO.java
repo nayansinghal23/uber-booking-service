@@ -1,7 +1,9 @@
 package com.example.uberbookingservice.dto;
 
-import com.example.uberentityservice.models.Driver;
+import com.example.uberentityservice.enums.BookingStatus;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -10,6 +12,6 @@ import lombok.*;
 @AllArgsConstructor
 public class CreateBookingResponseDTO {
     private Long bookingId;
-    private String bookingStatus;
-    private Driver driver;
+    private BookingStatus bookingStatus;
+    private List<DriverLocationDTO> nearbyDrivers;
 }
