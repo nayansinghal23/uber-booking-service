@@ -1,15 +1,15 @@
 package com.example.uberbookingservice.services;
 
-import com.example.uberbookingservice.dto.CreateBookingRequestDTO;
-import com.example.uberbookingservice.dto.CreateBookingResponseDTO;
-import com.example.uberbookingservice.dto.DriverLocationDTO;
-import com.example.uberbookingservice.dto.NearbyDriversRequestDTO;
+import com.example.uberbookingservice.dto.*;
 import com.example.uberbookingservice.helpers.CalculateTotalDistance;
 import com.example.uberbookingservice.repositories.BookingRepository;
+import com.example.uberbookingservice.repositories.DriverRepository;
 import com.example.uberbookingservice.repositories.ExactLocationRepository;
 import com.example.uberbookingservice.repositories.PassengerRepository;
 import com.example.uberentityservice.enums.BookingStatus;
+import com.example.uberentityservice.enums.UserType;
 import com.example.uberentityservice.models.Booking;
+import com.example.uberentityservice.models.Driver;
 import com.example.uberentityservice.models.ExactLocation;
 import com.example.uberentityservice.models.Passenger;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,15 +18,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final PassengerRepository passengerRepository;
+    private final DriverRepository driverRepository;
     private final ExactLocationRepository exactLocationRepository;
     private final RestTemplate restTemplate;
 
@@ -36,11 +34,13 @@ public class BookingServiceImpl implements BookingService {
     public BookingServiceImpl(
             BookingRepository bookingRepository,
             PassengerRepository passengerRepository,
+            DriverRepository driverRepository,
             ExactLocationRepository exactLocationRepository,
             RestTemplate restTemplate
     ) {
         this.bookingRepository = bookingRepository;
         this.passengerRepository = passengerRepository;
+        this.driverRepository = driverRepository;
         this.exactLocationRepository = exactLocationRepository;
         this.restTemplate = restTemplate;
     }
@@ -126,5 +126,21 @@ public class BookingServiceImpl implements BookingService {
         } catch (RestClientException exception) {
             return List.of();
         }
+    }
+
+    @Override
+    public List<GetAllBookingsResponseDTO> getAllBookings(GetAllBookingsRequestDTO dto) {
+        List<Booking> bookings = new ArrayList<>();
+        if (dto.getUserType() == UserType.DRIVER) {
+            Driver driver = driverRepository.findById(dto.getUserId()).orElseThrow(() -> new IllegalArgumentException("Driver not found"));
+            bookings = bookingRepository.findAllByDriverId(dto.getUserId());
+        } else {
+            Passenger passenger = passengerRepository.findById(dto.getUserId()).orElseThrow(() -> new IllegalArgumentException("Passenger not found"));
+            bookings = bookingRepository.findAllByPassengerId(dto.getUserId());
+        }
+        return bookings
+                .stream()
+                .map(GetAllBookingsResponseDTO::as)
+                .toList();
     }
 }

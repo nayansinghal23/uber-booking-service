@@ -17,8 +17,6 @@ public class UberBookingServiceApplication {
 }
 
 /**
- * Fetch all bookings for passengers
- * Fetch all bookings for drivers
  * Update booking status when driver accepts a ride (SCHEDULED)
  * Cancel a ride (CANCELLED)
  */
