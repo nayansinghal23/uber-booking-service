@@ -15,6 +15,7 @@ import com.example.uberentityservice.models.Passenger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
@@ -110,19 +111,19 @@ public class BookingServiceImpl implements BookingService {
                         .longitude(startLocation.getLongitude())
                         .build();
 
+        String url = locationServiceUrl + "/api/v1/location/nearby/drivers";
         try {
-            String url = locationServiceUrl + "/nearby/drivers";
-            var response = restTemplate.postForEntity(
-                    url,
-                    request,
-                    DriverLocationDTO[].class
-            );
+            ResponseEntity<DriverLocationDTO[]> response =
+                    restTemplate.postForEntity(
+                            url,
+                            request,
+                            DriverLocationDTO[].class
+                    );
             DriverLocationDTO[] drivers = response.getBody();
-            if (drivers == null) {
-                return List.of();
-            }
+            if (drivers == null || drivers.length == 0) return List.of();
+
             return Arrays.asList(drivers);
-        } catch (Exception e) {
+        } catch (RestClientException exception) {
             return List.of();
         }
     }
