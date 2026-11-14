@@ -51,4 +51,14 @@ public class BookingController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PatchMapping("/{bookingId}/accept/{driverId}")
+    private ResponseEntity<String> acceptBooking(@PathVariable Long bookingId, @PathVariable Long driverId) {
+        try {
+            bookingService.assignDriverToABooking(bookingId, driverId);
+            return new ResponseEntity<>("Booking has been accepted", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

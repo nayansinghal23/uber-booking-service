@@ -13,4 +13,5 @@ public interface BookingService {
     CreateBookingResponseDTO createBooking(CreateBookingRequestDTO dto);
     List<GetAllBookingsResponseDTO> getAllBookings(GetAllBookingsRequestDTO dto);
     void cancelBooking(Long bookingId);
+    void assignDriverToABooking(Long bookingId, Long driverId);
 }

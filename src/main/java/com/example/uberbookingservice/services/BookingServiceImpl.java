@@ -167,4 +167,26 @@ public class BookingServiceImpl implements BookingService {
 
         if (update == 0) throw new IllegalStateException("Booking cannot be cancelled");
     }
+
+    @Transactional
+    @Override
+    public void assignDriverToABooking(Long bookingId, Long driverId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Booking not found")
+                );
+
+        if (booking.getBookingStatus() != BookingStatus.ASSIGNING_DRIVER) throw new IllegalStateException("Driver cannot be assigned");
+
+        Driver driver = driverRepository.findById(driverId)
+                .orElseThrow(() -> new IllegalArgumentException("Driver not found"));
+
+        int update = bookingRepository.updateBookingStatus(bookingId, BookingStatus.SCHEDULED);
+
+        if (update == 0) throw new IllegalStateException("Booking cannot be scheduled");
+
+        int isDriverAssigned = bookingRepository.assignDriverToABooking(bookingId, driver);
+
+        if (isDriverAssigned == 0) throw new IllegalStateException("Driver cannot be assigned");
+    }
 }
