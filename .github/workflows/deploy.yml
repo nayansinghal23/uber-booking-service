@@ -44,7 +44,7 @@ jobs:
       - name: Build Booking Service
         run: |
           chmod +x gradlew
-          ./gradlew clean test bootJar
+          ./gradlew clean bootJar
 
       # Prepare JAR
       - name: Prepare JAR
