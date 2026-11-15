@@ -77,8 +77,11 @@ jobs:
 
       # Deploy
       - name: Deploy to EC2
+        shell: bash
         run: |
-          ssh -T ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          set -e
+
+          ssh -T ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'bash -s' << 'EOF'
             set -e
 
             echo "Installing JAR..."
@@ -90,28 +93,38 @@ jobs:
             rm /tmp/booking-service.jar
 
             echo "Restarting service..."
-
             sudo systemctl restart uber-booking-service
 
             echo "Waiting for application readiness..."
 
+            READY=false
+
             for i in {1..12}; do
-              if curl -s -o /dev/null \
+              HTTP_CODE=$(curl -s -o /dev/null \
                 -w "%{http_code}" \
+                --max-time 5 \
                 -X GET \
                 http://localhost:7479/api/v1/booking \
                 -H "Content-Type: application/json" \
-                -d '{"userId":1,"userType":"RIDER"}' | grep -qE '^(200|400)$'; then
+                -d '{"userId":1,"userType":"RIDER"}' || true)
 
-                echo "Booking Service is responding!"
-                exit 0
+              if [[ "$HTTP_CODE" == "200" || "$HTTP_CODE" == "400" ]]; then
+                echo "Booking Service is responding! HTTP $HTTP_CODE"
+                READY=true
+                break
               fi
 
               echo "Waiting for application... attempt $i"
               sleep 5
             done
 
-            echo "Deployment health check failed!"
-            sudo journalctl -u uber-booking-service -n 80 --no-pager
-            exit 1
+            if [[ "$READY" != "true" ]]; then
+              echo "Deployment health check failed!"
+              sudo journalctl -u uber-booking-service -n 80 --no-pager
+              exit 1
+            fi
+
+            echo "Booking Service deployed successfully!"
           EOF
+
+          echo "Remote deployment completed successfully!"
