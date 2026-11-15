@@ -28,7 +28,7 @@ jobs:
       - name: Checkout Entity Service
         uses: actions/checkout@v4
         with:
-          repository: nayansinghal23/UberEntityService
+          repository: nayansinghal23/uber-entity-service
           ref: master
           path: entity-service
           token: ${{ secrets.GITHUB_TOKEN }}
