@@ -78,8 +78,10 @@ jobs:
       # Deploy
       - name: Deploy to EC2
         run: |
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -T ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             set -e
+
+            echo "Installing JAR..."
 
             sudo install -o ubuntu -g ubuntu -m 644 \
               /tmp/booking-service.jar \
@@ -87,12 +89,29 @@ jobs:
 
             rm /tmp/booking-service.jar
 
+            echo "Restarting service..."
+
             sudo systemctl restart uber-booking-service
 
-            sleep 10
+            echo "Waiting for application readiness..."
 
-            sudo systemctl is-active --quiet uber-booking-service
-            sudo ss -lntp | grep -q ':7479'
+            for i in {1..12}; do
+              if curl -s -o /dev/null \
+                -w "%{http_code}" \
+                -X GET \
+                http://localhost:7479/api/v1/booking \
+                -H "Content-Type: application/json" \
+                -d '{"userId":1,"userType":"RIDER"}' | grep -qE '^(200|400)$'; then
 
-            echo "Booking Service deployed successfully!"
+                echo "Booking Service is responding!"
+                exit 0
+              fi
+
+              echo "Waiting for application... attempt $i"
+              sleep 5
+            done
+
+            echo "Deployment health check failed!"
+            sudo journalctl -u uber-booking-service -n 80 --no-pager
+            exit 1
           EOF
